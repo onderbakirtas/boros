@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
 
 Vue.use(VueRouter)
 
@@ -8,7 +7,7 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    component: Home
+    component: () => import('../modules/Home/')
   },
   {
     path: '/settings',
@@ -19,8 +18,7 @@ const routes = [
   {
     path: '/music',
     name: 'music',
-    component: () =>
-      import(/* webpackChunkName: "about" */ '../views/Music.vue')
+    component: () => import('../modules/Music/')
   },
   {
     path: '/video',

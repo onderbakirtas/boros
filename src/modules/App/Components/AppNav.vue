@@ -34,7 +34,9 @@ export default {
 
 <style lang="scss" scoped>
 .app-nav {
-  position: relative;
+  position: fixed;
+  left: 0;
+  height: 100vh;
   z-index: 999;
   padding: 0 1.2rem;
   background-color: rgba(0, 0, 0, 0.1);

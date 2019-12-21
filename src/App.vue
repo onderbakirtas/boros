@@ -1,28 +1,161 @@
+<script>
+import ColorThief from 'colorthief'
+import AppNav from './modules/App/Components/AppNav'
+import analyze from 'rgbaster'
+
+import { mapGetters } from 'vuex'
+
+export default {
+  name: 'App',
+  components: {
+    AppNav
+  },
+  data() {
+    return {
+      showIt: true,
+      image: require('@/assets/wp1.png'),
+      logo: require('@/assets/logo1.png'),
+      colorData: null,
+      imgTarget: null,
+      boxBg: '',
+      navItems: [
+        {
+          to: '/',
+          tooltip: 'Home',
+          icon: 'home'
+        },
+        {
+          to: '/music',
+          tooltip: 'Music',
+          icon: 'music'
+        },
+        {
+          to: '/video',
+          tooltip: 'Video',
+          icon: 'play'
+        },
+        {
+          to: '/startup',
+          tooltip: 'Startup',
+          icon: 'grid'
+        },
+        {
+          to: '/search',
+          tooltip: 'Search',
+          icon: 'search'
+        },
+        {
+          to: '/settings',
+          tooltip: 'Settings',
+          icon: 'settings'
+        },
+        {
+          to: '/add',
+          tooltip: 'New Item',
+          icon: 'plus'
+        }
+      ]
+    }
+  },
+  computed: {
+    ...mapGetters(['pickedBg']),
+    keymap() {
+      return {
+        // 'esc+ctrl' is OK.
+        'ctrl+esc': this.toggle,
+        'ctrl+shift+f': this.toggle,
+        enter: {
+          keydown: this.hide,
+          keyup: this.show
+        }
+      }
+    },
+    newColorData() {
+      return this.colorData
+    }
+  },
+  /* async mounted() {
+    await this.getColorData()
+  }, */
+  methods: {
+    async getColor() {
+      const res = await analyze(this.pickedBg, { scale: 0.5 })
+      this.boxBg = res[0].color
+      let shrink = this.boxBg.indexOf(')')
+      let colorVal =
+        this.boxBg.slice(0, 3) + 'a' + this.boxBg.slice(3, shrink) + ',0.5)'
+      console.log(colorVal)
+      console.log(res)
+      this.boxBg = colorVal
+    },
+    toggle() {
+      this.showIt = !this.showIt
+    },
+    show() {
+      this.showIt = true
+    },
+    hide() {
+      this.showIt = false
+    }
+    /* async getColorData() {
+      const colorSteal = new ColorThief()
+      const img = new Image()
+      console.log(this.$refs.logo)
+      let logoTarget = this.$refs.logo
+      img.onload = function(el) {
+        this.imgTarget = colorSteal.getColor(logoTarget)
+        console.log(this.imgTarget)
+        this.colorData = this.imgTarget
+        console.log('image loaded')
+      }
+      img.src = await logoTarget.src
+    } */
+  }
+}
+</script>
+
 <template>
-  <div id="app" v-hotkey="keymap" class="app">
-    <div class="app-main" :style="`background-image: url('${pickedBg}')`">
-      <transition name="slide">
-        <AppNav :nav-items="navItems" />
-      </transition>
-      <div class="app-view">
-        <transition name="slide-up">
-          <div v-show="showIt" class="app-topbar">
-            <input
-              type="text"
-              class="global-input"
-              placeholder="İnternette veya dosyalarınızda arama yapın..."
-            />
-          </div>
-        </transition>
-        <transition name="scale-fade">
-          <router-view v-show="showIt" />
-        </transition>
+  <div
+    id="app"
+    v-hotkey="keymap"
+    class="app"
+    :style="`background-image: url('${pickedBg}')`"
+  >
+    <transition name="slide">
+      <AppNav :nav-items="navItems" :style="`background: ${boxBg}`" />
+    </transition>
+    <scrollbar maxHeight="100vh" class="app-main">
+      <div class="box" :style="`background: ${boxBg}`"></div>
+      <div class="app-bg">
+        <div class="app-view">
+          <transition name="slide-up">
+            <div v-show="showIt" class="app-topbar">
+              <input
+                type="text"
+                class="global-input"
+                placeholder="İnternette veya dosyalarınızda arama yapın..."
+              />
+            </div>
+          </transition>
+          <transition name="scale-fade">
+            <router-view v-show="showIt" class="app-wrapper" />
+          </transition>
+        </div>
+        <button @click="getColor">Get Dominant Color</button>
       </div>
-    </div>
+    </scrollbar>
   </div>
 </template>
 
 <style lang="scss">
+.box {
+  width: 200px;
+  height: 200px;
+  background: #fff;
+  position: fixed;
+  top: 200px;
+  left: 300px;
+}
 .scrollbar-wrap .scrollbar {
   background: #aaa !important;
   opacity: 0.4 !important;
@@ -57,31 +190,52 @@ body {
   font-family: $font2;
 }
 
+.page {
+  padding: 2rem;
+}
+
 .app {
   height: 100vh;
+  width: 100%;
   display: flex;
-  flex-direction: column;
   cursor: default;
+  position: relative;
+  transition: background 0.3s;
+
+  &-wrapper {
+    height: 100%;
+    position: relative;
+  }
+
+  &-bg {
+    background-attachment: fixed;
+  }
 
   &-main {
     display: flex;
-    background: url('~@/assets/wp1.png') no-repeat top left;
     background-size: cover;
     flex-grow: 1;
     flex-shrink: 1;
     flex-basis: auto;
     position: relative;
-    transition: 0.3s;
+    transition: 0.5s;
   }
 
   &-topbar {
     padding: 1rem;
+    position: fixed;
+    width: 50%;
+    left: 25%;
+    margin: 0 auto;
+    display: block;
   }
 
   &-view {
     flex-basis: 100%;
+    height: 100vh;
     flex-grow: 1;
     flex-shrink: 1;
+    padding-left: 6rem;
   }
 }
 #app {
@@ -145,14 +299,28 @@ body {
 .slide-up-leave-to {
   transform: translateY(-100%);
 }
-.scale-fade-enter-active,
+.scale-fade-enter-active {
+  opacity: 1;
+  transition: opacity 0.2s, transform 0.3s;
+}
 .scale-fade-leave-active {
   opacity: 1;
-  transition: opacity 0.5s;
+  transition: opacity 0.2s, transform 0.3s;
 }
 
-.scale-fade-enter,
+.scale-fade-enter {
+  opacity: 0;
+}
 .scale-fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s;
+}
+.fade-enter,
+.fade-leave-to {
   opacity: 0;
 }
 
@@ -268,107 +436,3 @@ body {
   }
 }
 </style>
-
-<script>
-import ColorThief from 'colorthief'
-import AppNav from './modules/App/Components/AppNav'
-
-import { mapGetters } from 'vuex'
-
-export default {
-  name: 'App',
-  components: {
-    AppNav
-  },
-  data() {
-    return {
-      showIt: true,
-      image: require('@/assets/wp1.png'),
-      logo: require('@/assets/logo1.png'),
-      colorData: null,
-      imgTarget: null,
-      navItems: [
-        {
-          to: '/',
-          tooltip: 'Home',
-          icon: 'home'
-        },
-        {
-          to: '/music',
-          tooltip: 'Music',
-          icon: 'music'
-        },
-        {
-          to: '/video',
-          tooltip: 'Video',
-          icon: 'play'
-        },
-        {
-          to: '/startup',
-          tooltip: 'Startup',
-          icon: 'grid'
-        },
-        {
-          to: '/search',
-          tooltip: 'Search',
-          icon: 'search'
-        },
-        {
-          to: '/settings',
-          tooltip: 'Settings',
-          icon: 'settings'
-        },
-        {
-          to: '/add',
-          tooltip: 'New Item',
-          icon: 'plus'
-        }
-      ]
-    }
-  },
-  computed: {
-    ...mapGetters(['pickedBg']),
-    keymap() {
-      return {
-        // 'esc+ctrl' is OK.
-        'ctrl+esc': this.toggle,
-        'ctrl+shift+f': this.toggle,
-        enter: {
-          keydown: this.hide,
-          keyup: this.show
-        }
-      }
-    },
-    newColorData() {
-      return this.colorData
-    }
-  },
-  /* async mounted() {
-    await this.getColorData()
-  }, */
-  methods: {
-    toggle() {
-      this.showIt = !this.showIt
-    },
-    show() {
-      this.showIt = true
-    },
-    hide() {
-      this.showIt = false
-    }
-    /* async getColorData() {
-      const colorSteal = new ColorThief()
-      const img = new Image()
-      console.log(this.$refs.logo)
-      let logoTarget = this.$refs.logo
-      img.onload = function(el) {
-        this.imgTarget = colorSteal.getColor(logoTarget)
-        console.log(this.imgTarget)
-        this.colorData = this.imgTarget
-        console.log('image loaded')
-      }
-      img.src = await logoTarget.src
-    } */
-  }
-}
-</script>

@@ -23,7 +23,7 @@ export default {
     ...mapActions(['setBg']),
     closeWindow() {
       console.log('hide')
-      this.windowHidden = true
+      this.showWindow = false
     },
     selectBg(n) {
       this.selectedBg = event.target.src
@@ -62,13 +62,14 @@ export default {
     :w="700"
     :x="currentWindowPos.x"
     :y="currentWindowPos.y"
+    :z="currentWindowPos.z"
     :resizable="false"
     @dragging="onDrag"
   >
     <transition name="scale-fade">
       <div
         class="window window-settings window-settings-background"
-        v-if="showWindow"
+        v-if="viewWindow"
       >
         <header class="window-header">Select a backgroud</header>
         <scrollbar maxHeight="42rem">
@@ -211,7 +212,7 @@ export default {
 
 .btn {
   border: none;
-  border-radius: 1rem;
+  border-radius: 0.8rem;
   background: rgba($color: #ffffff, $alpha: 0.3);
   font-family: inherit;
   height: 3.2rem;
@@ -220,10 +221,16 @@ export default {
   font-weight: 600;
   outline: none;
   transition: background 0.2s, color 0.1s;
+  color: rgba($color: #ffffff, $alpha: 0.7);
 
   &:hover {
     background: rgba($color: #ffffff, $alpha: 0.5);
     color: #fff;
+  }
+
+  &:active {
+    color: rgba($color: #000, $alpha: 0.7);
+    background: rgba($color: #ffffff, $alpha: 0.3);
   }
 }
 </style>
