@@ -8,6 +8,10 @@ import ColorThief from 'colorthief'
 import VueDraggableResizable from 'vue-draggable-resizable'
 import VueScrollbar from 'vue-scrollbar-live'
 
+import si from 'systeminformation'
+
+Object.defineProperty(Vue.prototype, '$si', { value: si })
+
 import 'vue-scrollbar-live/lib/css/index.css'
 import 'vue-draggable-resizable/dist/VueDraggableResizable.css'
 
@@ -21,6 +25,7 @@ Vue.use(feather, 'v-icon')
   .use(VTooltip)
   .use(VueScrollbar)
   .use(ColorThief)
+  .use(si)
 
 Vue.config.productionTip = false
 

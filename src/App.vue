@@ -18,6 +18,7 @@ export default {
       colorData: null,
       imgTarget: null,
       boxBg: '',
+      cpu: null,
       navItems: [
         {
           to: '/',
@@ -110,6 +111,14 @@ export default {
       }
       img.src = await logoTarget.src
     } */
+  },
+  mounted() {
+    console.log(this.cpu)
+    this.$si.cpu().then(data => {
+      console.log(data)
+      this.cpu = data
+    })
+    console.log(this.cpu)
   }
 }
 </script>

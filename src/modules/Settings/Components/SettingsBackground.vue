@@ -64,7 +64,7 @@ export default {
     :y="currentWindowPos.y"
     :z="currentWindowPos.z"
     :resizable="false"
-    @dragging="onDrag"
+    @dragstop="onDrag"
   >
     <transition name="scale-fade">
       <div

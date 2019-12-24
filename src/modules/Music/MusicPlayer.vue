@@ -2,6 +2,11 @@
 import { mapGetters, mapActions } from 'vuex'
 export default {
   name: 'MusicPlayer',
+  data() {
+    return {
+      playlist: []
+    }
+  },
   computed: {
     ...mapGetters(['mpWinPos'])
   },
@@ -18,7 +23,18 @@ export default {
       console.log(pos)
       this.setMpPos(pos)
       console.log(this.mpWinPos)
+    },
+    getSongs() {
+      const songs = require.context('@/files/', true, /\.mp3$/).keys()
+      songs.forEach(el => {
+        el = el.replace('./', '')
+        this.playlist.push(el)
+      })
+      console.log(this.playlist)
     }
+  },
+  mounted() {
+    this.getSongs()
   }
 }
 </script>
